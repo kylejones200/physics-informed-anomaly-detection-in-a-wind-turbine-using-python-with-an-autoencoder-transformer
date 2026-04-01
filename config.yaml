@@ -1,0 +1,37 @@
+data:
+  source: null
+  features:
+    - temp
+    - pressure
+    - humidity
+    - altitude
+    - voltage
+    - power
+    - rpm
+    - gearbox_vibration
+
+preprocessing:
+  wavelet: "db6"
+  contamination: 0.01
+  n_estimators: 100
+  random_state: 42
+
+tensor:
+  interval: 5
+  time_steps_multiplier: 20
+  step: 10
+  target_shape: [10, 10]
+  n_chunks: 60
+
+output:
+  figures_dir: "images"
+  data_dir: "data"
+  figure_format: "png"
+  figure_dpi: 100
+
+analysis:
+  run_preprocessing: true
+  run_anomaly_detection: true
+  run_correlation: true
+  create_tensors: true
+

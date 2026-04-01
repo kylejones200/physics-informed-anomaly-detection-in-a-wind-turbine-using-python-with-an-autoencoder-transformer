@@ -1,13 +1,50 @@
-# Physics informed anomaly detection in a wind turbine using Python with an autoencoder transformer
+# Physics-Informed Anomaly Detection in Wind Turbine
 
-**Published:** 2024-12-18
-**Medium:** [https://medium.com/@kyle-t-jones/physics-informed-anomaly-detection-in-a-wind-turbine-using-python-with-an-autoencoder-transformer-06eb68aeb0e8](https://medium.com/@kyle-t-jones/physics-informed-anomaly-detection-in-a-wind-turbine-using-python-with-an-autoencoder-transformer-06eb68aeb0e8)
+This project demonstrates physics-informed anomaly detection for wind turbine data using wavelet denoising, Isolation Forest, and tensor preparation for deep learning models.
 
-## About
+## Article
 
-Place the code for this article in this repository.
-The original article export is saved as `article.md`.
+Medium article: [Physics-Informed Anomaly Detection in Wind Turbine](https://medium.com/@kylejones_47003/physics-informed-anomaly-detection-in-a-wind-turbine-using-python-with-an-autoencoder-transformer-06eb68aeb0e8)
 
-## Files
+## Project Structure
 
-Add your `.ipynb`, `.py`, `.yaml`, `.js`, `.ts`, or other project files here.
+```
+.
+├── README.md           # This file
+├── main.py            # Main entry point
+├── config.yaml        # Configuration file
+├── requirements.txt   # Python dependencies
+├── src/               # Core functions
+│   ├── core.py        # Anomaly detection functions
+│   └── plotting.py    # Tufte-style plotting utilities
+├── tests/             # Unit tests
+├── data/              # Data files and tensor chunks
+└── images/            # Generated plots and figures
+```
+
+## Data Format
+
+The input CSV should contain the following columns (or adjust in config.yaml):
+- temp
+- pressure
+- humidity
+- altitude
+- voltage
+- power
+- rpm
+- gearbox_vibration
+
+## Configuration
+
+Edit `config.yaml` to customize:
+- Feature names
+- Preprocessing parameters (wavelet type, contamination level)
+- Tensor creation parameters
+- Which analyses to run
+
+## Caveats
+
+- The script requires a CSV file with wind turbine sensor data.
+- Wavelet denoising uses Daubechies 6 (db6) wavelet by default.
+- Isolation Forest contamination parameter controls the expected proportion of anomalies.
+- Tensor chunks are saved as .npy files for use with deep learning models.
