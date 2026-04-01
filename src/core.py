@@ -73,7 +73,7 @@ def reshape_for_tensor(X: np.ndarray, n_cols: int, target_shape: Tuple[int, int]
     return X.reshape(X.shape[0], n_cols, target_shape[0], target_shape[1])
 
 def plot_denoised_data(df_train: pd.DataFrame, output_path: Path):
- """Plot denoised and normalized data """
+    """Plot denoised and normalized data """
     fig, ax = plt.subplots(figsize=(12, 6))
     
     for col in df_train.columns:
@@ -107,7 +107,7 @@ def plot_anomaly_detection(df: pd.DataFrame, anomalies: pd.DataFrame,
     plt.close()
 
 def plot_correlation_heatmap(df: pd.DataFrame, output_path: Path):
- """Plot correlation heatmap """
+    """Plot correlation heatmap """
     corr = df.corr()
     mask = np.zeros_like(corr)
     mask[np.triu_indices_from(mask)] = True

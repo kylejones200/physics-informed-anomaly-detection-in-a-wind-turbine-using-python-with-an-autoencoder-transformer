@@ -12,7 +12,7 @@ import os
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from src.core import ((level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+from src.core import (
     preprocess_data,
     detect_anomalies,
     create_dataset,
