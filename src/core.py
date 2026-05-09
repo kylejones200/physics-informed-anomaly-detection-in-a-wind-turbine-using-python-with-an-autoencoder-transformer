@@ -88,7 +88,7 @@ def plot_denoised_data(df_train: pd.DataFrame, output_path: Path):
 
 def plot_anomaly_detection(df: pd.DataFrame, anomalies: pd.DataFrame,
                           feature: str, output_path: Path):
- """Plot anomaly detection results """
+    """Plot anomaly detection results """
     fig, ax = plt.subplots(figsize=(12, 6))
     
     normal_mask = ~df.index.isin(anomalies.index)
