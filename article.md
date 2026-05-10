@@ -1,10 +1,15 @@
+---
+author: "Kyle Jones"
+date_published: "December 18, 2024"
+date_exported_from_medium: "November 10, 2025"
+canonical_link: "https://medium.com/@kyle-t-jones/physics-informed-anomaly-detection-in-a-wind-turbine-using-python-with-an-autoencoder-transformer-06eb68aeb0e8"
+---
+
 # Physics-informed anomaly detection in a wind turbine using Python with an autoencoder transformer The challenge we're trying to address here is to detect anomalies in the
 components of a Wind Turbine. Each wind turbine has many sensors...
 
 ### Physics-informed anomaly detection in a wind turbine using Python with an autoencoder transformer
-The challenge we're trying to address here is to detect anomalies in the
-components of a Wind Turbine. Each wind turbine has many sensors that
-reads data like:
+The challenge we're trying to address here is to detect anomalies in the components of a Wind Turbine. Each wind turbine has many sensors that reads data like:
 
 - external temperature
 - Rotor speed
@@ -12,48 +17,20 @@ reads data like:
 - Voltage (or current) in the generator
 - Vibration in the GearBox, Generator, and Tower
 
-
-<figcaption>Photo by <a
-href="https://unsplash.com/@farber?utm_source=medium&amp;utm_medium=referral"
-class="markup--anchor markup--figure-anchor"
-data-href="https://unsplash.com/@farber?utm_source=medium&amp;utm_medium=referral"
-rel="photo-creator noopener" target="_blank">Jonathan Farber</a> on <a
-href="https://unsplash.com?utm_source=medium&amp;utm_medium=referral"
-class="markup--anchor markup--figure-anchor"
-data-href="https://unsplash.com?utm_source=medium&amp;utm_medium=referral"
-rel="photo-source noopener" target="_blank">Unsplash</a></figcaption>
-
-
-Depending on the type of the anomalies we want to detect, we need to
-select one or more features and then prepare a dataset that 'explains'
-the anomalies. We are interested in three types of anomalies:
+Depending on the type of the anomalies we want to detect, we need to select one or more features and then prepare a dataset that 'explains' the anomalies. We are interested in three types of anomalies:
 
 - Rotor speed (when the rotor is not in an expected speed)
-- Produced voltage (when the generator is not producing the expected
-  voltage)
-- Gearbox vibration (when the vibration of the gearbox is far from the
-  expected)
+- Produced voltage (when the generator is not producing the expected voltage)
+- Gearbox vibration (when the vibration of the gearbox is far from the expected)
 
-All these three anomalies (or violations) depend on many variables while
-the turbine is working. We use an unsupervised ML model called
-[Autoencoder](https://en.wikipedia.org/wiki/Autoencoder) that correlates features. It learns the
-latent representation of the dataset and tries to predict the same
-tensor given as input. The strategy then is to use a dataset collected
-from a normal turbine (without anomalies). The model will then learn
-'normal behavior'. When the sensors readings of a malfunctioning turbine
-is used as input, the model will not be able to rebuild the input,
-predicting something with a high error and detected as an anomaly.
+All these three anomalies (or violations) depend on many variables while the turbine is working. We use an unsupervised ML model called [Autoencoder](https://en.wikipedia.org/wiki/Autoencoder) that correlates features. It learns the latent representation of the dataset and tries to predict the same tensor given as input. The strategy then is to use a dataset collected from a normal turbine (without anomalies). The model will then learn 'normal behavior'. When the sensors readings of a malfunctioning turbine is used as input, the model will not be able to rebuild the input, predicting something with a high error and detected as an anomaly.
 
-Sensors readings are time-series data and we observe a high correlation
-between neighbor samples. We can explore this by reformatting the data
-as a multidimensional tensor. We'll create a temporal encoding of eight
-features in 10x10 steps to create a tensor with a shape of 8x10x10.
+Sensors readings are time-series data and we observe a high correlation between neighbor samples. We can explore this by reformatting the data as a multidimensional tensor. We'll create a temporal encoding of eight features in 10x10 steps to create a tensor with a shape of 8x10x10.
 
 Let's start preparing our dataset.
 
 ### Helper function
-We use the `wavelet_denoise()` function
-to smooth out the time series data it is built on the library pywt.
+We use the `wavelet_denoise()` function to smooth out the time series data it is built on the library pywt.
 
 ```python
 %maptloplib inline
@@ -77,8 +54,7 @@ def wavelet_denoise(data, wavelet, noise_sigma):
 
 Features:
 
-- timestamp: timestamp of the row (sensors report every 90
-  seconds)
+- timestamp: timestamp of the row (sensors report every 90 seconds)
 - sensorId: id of the edge device that collected the data
 - long: longitude of the turbine that produced this data
 - lat: latitude of the turbine that produced this data
@@ -96,8 +72,7 @@ Features:
 - anomaly: expert provided label for if row was anomaly
 
 ### Plotting the vibration data
-Our data is noisy --- there is so much happening that we can't see the
-patterns.
+Our data is noisy --- there is so much happening that we can't see the patterns.
 
 ``` 
 # Plot and save original data
@@ -109,10 +84,8 @@ plt.savefig('original_data.png')
 plt.show()
 ```
 
-
 ### Cleaning and normalizing
-So we will clear and simplify the data. The wavelet function preserves
-the physics behind how these parts work.
+So we will clear and simplify the data. The wavelet function preserves the physics behind how these parts work.
 
 ```python
 # Denoise and normalize the data
@@ -126,7 +99,6 @@ from sklearn.preprocessing import StandardScaler
 scaler = StandardScaler()
 df_train = pd.DataFrame(scaler.fit_transform(df_train[features]), columns=features)
 
-
 # Plot and save denoised & normalized data
 plt.figure(figsize=(20,10))
 df_train.plot(figsize=(20,10))
@@ -135,7 +107,6 @@ plt.tight_layout()
 plt.savefig('denoised_normalized_data.png')
 plt.show()
 ```
-
 
 Nice, now we can see a lot more.
 
@@ -166,9 +137,7 @@ plt.show()
 print(f"Number of anomalies detected: {len(anomalies)}")
 ```
 
-
-We find there were two periods associated with a lot of anomalies. From
-the business side, we will want to look into these more.
+We find there were two periods associated with a lot of anomalies. From the business side, we will want to look into these more.
 
 ``` 
 # Create and save correlation heatmap
@@ -183,13 +152,9 @@ plt.savefig('correlation_heatmap.png')
 plt.show()
 ```
 
+The correlation map shows us the autocorrelation between features. We see that many of these values are correlated, which makes sense since this is sensor data from a machine.
 
-The correlation map shows us the autocorrelation between features. We
-see that many of these values are correlated, which makes sense since
-this is sensor data from a machine.
-
-Now we can convert the data into tensors and save the results as numpy
-arrays. These are more efficient for use in the autoencoder model.
+Now we can convert the data into tensors and save the results as numpy arrays. These are more efficient for use in the autoencoder model.
 
 ```python
 def create_dataset(X, time_steps=1, step=1):
@@ -216,18 +181,13 @@ for i,x in enumerate(np.array_split(X, 60)):
     np.save('data/wind_turbine_%02d.npy' % i, x)
 ```
 
-Use the **SageMaker Studio Kernel**: Data Science. We are using
-SageMaker from AWS.
+Use the **SageMaker Studio Kernel**: Data Science. We are using SageMaker from AWS.
 
 - Upload the dataset
 - Train your ML model using Pytorch
-- Compute the thresholds, used by the application, to classify the
-  predictions as anomalies or normal behavior
-- [Compile/Optimize your model to your edge device (Linux ARM64) using
-  [SageMaker
-  NEO](https://docs.aws.amazon.com/sagemaker/latest/dg/neo.html)]
-- Create a deployment package with a signed model + the runtime used by
-  SageMaker Edge Agent to load and invoke the optimized model
+- Compute the thresholds, used by the application, to classify the predictions as anomalies or normal behavior
+- [Compile/Optimize your model to your edge device (Linux ARM64) using [SageMaker NEO](https://docs.aws.amazon.com/sagemaker/latest/dg/neo.html)]
+- Create a deployment package with a signed model + the runtime used by SageMaker Edge Agent to load and invoke the optimized model
 - Deploy the package using IoT Jobs
 
 Importing the data we just saved in numpy format.
@@ -384,8 +344,7 @@ if __name__ == '__main__':
 ```
 
 ### [Train the model with SageMaker](https://studio.us-east-1.prod.workshops.aws/preview/7006f67c-6f78-4a8a-b2ec-37364cd2dca7/builds/2e946d5f-d58f-477b-b66a-50d82dfd05a9/en-US/05-machine-learning/02-build-and-deploy#train-the-model-with-sagemaker)
-We use the built in SageMaker PyTorch container with the custom model we
-created above.
+We use the built in SageMaker PyTorch container with the custom model we created above.
 
 ``` 
 estimator = PyTorch(
@@ -413,22 +372,16 @@ estimator = PyTorch(
 )
 ```
 
-Take the estimator object and execute the training job. This step will
-take 3--5 minutes.
+Take the estimator object and execute the training job. This step will take 3--5 minutes.
 
 ``` 
 estimator.fit({'train': train_input})
 ```
 
 #### [Compute the threshold based on MAE](https://studio.us-east-1.prod.workshops.aws/preview/7006f67c-6f78-4a8a-b2ec-37364cd2dca7/builds/2e946d5f-d58f-477b-b66a-50d82dfd05a9/en-US/05-machine-learning/02-build-and-deploy#compute-the-threshold-based-on-mae)
-In the context of machine learning, absolute error refers to the
-magnitude of difference between the prediction of an observation and the
-true value of that observation. Mean Absolute Error (MAE) takes the
-average of absolute errors for a group of predictions and observations
-as a measurement of the magnitude of errors for the entire group.
+In the context of machine learning, absolute error refers to the magnitude of difference between the prediction of an observation and the true value of that observation. Mean Absolute Error (MAE) takes the average of absolute errors for a group of predictions and observations as a measurement of the magnitude of errors for the entire group.
 
-MAE helps users to formulate learning problems into optimization
-problems.
+MAE helps users to formulate learning problems into optimization problems.
 
 The transform job will take approximately 10 minutes to complete.
 
@@ -473,8 +426,7 @@ print(",".join(thresholds.astype(str)), thresholds.shape)
 ```
 
 #### Compile the trained model for the edge
-We compile the model using SageMaker Neo so it is optimized to work at
-the edge. In this case, we will deploy the model to Jetson Nano.
+We compile the model using SageMaker Neo so it is optimized to work at the edge. In this case, we will deploy the model to Jetson Nano.
 
 ```python
 import time
@@ -507,9 +459,7 @@ while True:
 ```
 
 #### Building the deployment package
-Start the SageMaker Edge Manager model packaging job. After the model
-has been package, Amazon SageMaker saves the resulting artifacts to an
-S3 bucket that you specify.
+Start the SageMaker Edge Manager model packaging job. After the model has been package, Amazon SageMaker saves the resulting artifacts to an S3 bucket that you specify.
 
 ```python
 import time
@@ -538,16 +488,11 @@ while True:
 
 We can deploy the model using IOT jobs.
 
-As a prerequisite, be sure to create a "Thing group" called
-`WindTurbineFarm` in the IOT Core
-service.
+As a prerequisite, be sure to create a "Thing group" called `WindTurbineFarm` in the IOT Core service.
 
-You also need to ensure the SageMaker Execution Role has permissions to
-contact the Thing group. You can attach a policy to the SageMaker
-Execution Role directly in the AWS IAM Console.
+You also need to ensure the SageMaker Execution Role has permissions to contact the Thing group. You can attach a policy to the SageMaker Execution Role directly in the AWS IAM Console.
 
-Kick off the deployment process for edge devices in the
-`WindTurbineFarm` Thing Group.
+Kick off the deployment process for edge devices in the `WindTurbineFarm` Thing Group.
 
 ```python
 import boto3
@@ -578,44 +523,20 @@ resp = iot_client.create_job(
 )
 ```
 
-Once the deployment is initiated, you can view models prepared for the
-Edge in SageMaker under "Edge Packaging Jobs".
-
+Once the deployment is initiated, you can view models prepared for the Edge in SageMaker under "Edge Packaging Jobs".
 
 #### Related Posts
-This article is part of a series of posts on time series forecasting.
-Here is the list of articles in the order they were designed to be read.
+This article is part of a series of posts on time series forecasting. Here is the list of articles in the order they were designed to be read.
 
-1.  [[Time Series for Business Analytics with
-    Python](https://medium.com/@kylejones_47003/time-series-for-business-analytics-with-python-a92b30eecf62?source=your_stories_page-------------------------------------)]
-2.  [[Time Series Visualization for Business Analysis with
-    Python](https://medium.com/@kylejones_47003/time-series-visualization-for-business-analysis-with-python-5df695543d4a?source=your_stories_page-------------------------------------)]
-3.  [[Patterns in Time Series for
-    Forecasting](https://medium.com/@kylejones_47003/patterns-in-time-series-for-forecasting-8a0d3ad3b7f5?source=your_stories_page-------------------------------------)]
-4.  [[Imputing Missing Values in Time Series Data for Business Analytics
-    with
-    Python](https://medium.com/@kylejones_47003/imputing-missing-values-in-time-series-data-for-business-analytics-with-python-b30a1ef6aaa6?source=your_stories_page-------------------------------------)]
-5.  [[Measuring Error in Time Series Forecasting with
-    Python](https://medium.com/@kylejones_47003/measuring-error-in-time-series-forecasting-with-python-18d743a535fd?source=your_stories_page-------------------------------------)]
-6.  [[Univariate and Multivariate Time Series Analysis with
-    Python](https://medium.com/@kylejones_47003/univariate-and-multivariate-time-series-analysis-with-python-b22c6ec8f133?source=your_stories_page-------------------------------------)]
-7.  [[Feature Engineering for Time Series Forecasting in
-    Python](https://medium.com/@kylejones_47003/feature-engineering-for-time-series-forecasting-in-python-7c469f69e260?source=your_stories_page-------------------------------------)]
-8.  [[Anomaly Detection in Time Series Data with
-    Python](https://medium.com/@kylejones_47003/anomaly-detection-in-time-series-data-with-python-5a15089636db?source=your_stories_page-------------------------------------)]
-9.  [[Dickey-Fuller Test for Stationarity in Time Series with
-    Python](https://medium.com/@kylejones_47003/dickey-fuller-test-for-stationarity-in-time-series-with-python-4e4bf1953eed?source=your_stories_page-------------------------------------)]
-10. [[Using Classification Model for Time Series Forecasting with
-    Python](https://medium.com/@kylejones_47003/using-classification-model-for-time-series-forecasting-with-python-d74a1021a5c4?source=your_stories_page-------------------------------------)]
-11. [[Measuring Error in Time Series Forecasting with
-    Python](https://medium.com/@kylejones_47003/measuring-error-in-time-series-forecasting-with-python-18d743a535fd?source=your_stories_page-------------------------------------)]
-12. [[Physics-informed anomaly detection in a wind turbine using Python
-    with an autoencoder
-    transformer](https://medium.com/@kylejones_47003/physics-informed-anomaly-detection-in-a-wind-turbine-using-python-with-an-autoencoder-transformer-06eb68aeb0e8?source=your_stories_page-------------------------------------)]
-::::::::By [Kyle Jones](https://medium.com/@kyle-t-jones) on
-[December 18, 2024](https://medium.com/p/06eb68aeb0e8).
-
-[Canonical
-link](https://medium.com/@kyle-t-jones/physics-informed-anomaly-detection-in-a-wind-turbine-using-python-with-an-autoencoder-transformer-06eb68aeb0e8)
-
-Exported from [Medium](https://medium.com) on November 10, 2025.
+1.  [[Time Series for Business Analytics with Python](https://medium.com/@kylejones_47003/time-series-for-business-analytics-with-python-a92b30eecf62?source=your_stories_page-------------------------------------)]
+2.  [[Time Series Visualization for Business Analysis with Python](https://medium.com/@kylejones_47003/time-series-visualization-for-business-analysis-with-python-5df695543d4a?source=your_stories_page-------------------------------------)]
+3.  [[Patterns in Time Series for Forecasting](https://medium.com/@kylejones_47003/patterns-in-time-series-for-forecasting-8a0d3ad3b7f5?source=your_stories_page-------------------------------------)]
+4.  [[Imputing Missing Values in Time Series Data for Business Analytics with Python](https://medium.com/@kylejones_47003/imputing-missing-values-in-time-series-data-for-business-analytics-with-python-b30a1ef6aaa6?source=your_stories_page-------------------------------------)]
+5.  [[Measuring Error in Time Series Forecasting with Python](https://medium.com/@kylejones_47003/measuring-error-in-time-series-forecasting-with-python-18d743a535fd?source=your_stories_page-------------------------------------)]
+6.  [[Univariate and Multivariate Time Series Analysis with Python](https://medium.com/@kylejones_47003/univariate-and-multivariate-time-series-analysis-with-python-b22c6ec8f133?source=your_stories_page-------------------------------------)]
+7.  [[Feature Engineering for Time Series Forecasting in Python](https://medium.com/@kylejones_47003/feature-engineering-for-time-series-forecasting-in-python-7c469f69e260?source=your_stories_page-------------------------------------)]
+8.  [[Anomaly Detection in Time Series Data with Python](https://medium.com/@kylejones_47003/anomaly-detection-in-time-series-data-with-python-5a15089636db?source=your_stories_page-------------------------------------)]
+9.  [[Dickey-Fuller Test for Stationarity in Time Series with Python](https://medium.com/@kylejones_47003/dickey-fuller-test-for-stationarity-in-time-series-with-python-4e4bf1953eed?source=your_stories_page-------------------------------------)]
+10. [[Using Classification Model for Time Series Forecasting with Python](https://medium.com/@kylejones_47003/using-classification-model-for-time-series-forecasting-with-python-d74a1021a5c4?source=your_stories_page-------------------------------------)]
+11. [[Measuring Error in Time Series Forecasting with Python](https://medium.com/@kylejones_47003/measuring-error-in-time-series-forecasting-with-python-18d743a535fd?source=your_stories_page-------------------------------------)]
+12. [[Physics-informed anomaly detection in a wind turbine using Python with an autoencoder transformer](https://medium.com/@kylejones_47003/physics-informed-anomaly-detection-in-a-wind-turbine-using-python-with-an-autoencoder-transformer-06eb68aeb0e8?source=your_stories_page-------------------------------------)]
