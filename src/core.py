@@ -72,51 +72,54 @@ def reshape_for_tensor(X: np.ndarray, n_cols: int, target_shape: Tuple[int, int]
     X = np.transpose(X, (0, 2, 1))
     return X.reshape(X.shape[0], n_cols, target_shape[0], target_shape[1])
 
-def plot_denoised_data(df_train: pd.DataFrame, output_path: Path):
+def plot_denoised_data(df_train: pd.DataFrame, output_path: Path, plot: bool = False):
     """Plot denoised and normalized data """
-    fig, ax = plt.subplots(figsize=(12, 6))
+    if plot:
+        fig, ax = plt.subplots(figsize=(12, 6))
     
-    for col in df_train.columns:
-        ax.plot(df_train.index, df_train[col], label=col, linewidth=1.0, alpha=0.7)
+        for col in df_train.columns:
+            ax.plot(df_train.index, df_train[col], label=col, linewidth=1.0, alpha=0.7)
     
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Normalized Value")
-    ax.legend(loc='best', ncol=2)
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Normalized Value")
+        ax.legend(loc='best', ncol=2)
     
-    plt.savefig(output_path, dpi=100, bbox_inches="tight")
-    plt.close()
+        plt.savefig(output_path, dpi=100, bbox_inches="tight")
+        plt.close()
 
 def plot_anomaly_detection(df: pd.DataFrame, anomalies: pd.DataFrame,
                           feature: str, output_path: Path):
     """Plot anomaly detection results """
-    fig, ax = plt.subplots(figsize=(12, 6))
+                          if plot:
+        fig, ax = plt.subplots(figsize=(12, 6))
     
-    normal_mask = ~df.index.isin(anomalies.index)
-    normal_data = df[normal_mask]
+        normal_mask = ~df.index.isin(anomalies.index)
+        normal_data = df[normal_mask]
     
-    ax.scatter(normal_data.index, normal_data[feature], 
-              c='#4A90A4', label='Normal', s=20, alpha=0.6)
-    ax.scatter(anomalies.index, anomalies[feature], 
-              c='#D4A574', label='Anomaly', s=30, alpha=0.8)
+        ax.scatter(normal_data.index, normal_data[feature], 
+                  c='#4A90A4', label='Normal', s=20, alpha=0.6)
+        ax.scatter(anomalies.index, anomalies[feature], 
+                  c='#D4A574', label='Anomaly', s=30, alpha=0.8)
     
-    ax.set_xlabel("Time")
-    ax.set_ylabel(feature)
-    ax.legend(loc='best')
+        ax.set_xlabel("Time")
+        ax.set_ylabel(feature)
+        ax.legend(loc='best')
     
-    plt.savefig(output_path, dpi=100, bbox_inches="tight")
-    plt.close()
+        plt.savefig(output_path, dpi=100, bbox_inches="tight")
+        plt.close()
 
-def plot_correlation_heatmap(df: pd.DataFrame, output_path: Path):
+def plot_correlation_heatmap(df: pd.DataFrame, output_path: Path, plot: bool = False):
     """Plot correlation heatmap """
     corr = df.corr()
     mask = np.zeros_like(corr)
     mask[np.triu_indices_from(mask)] = True
     
-    fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(corr, annot=True, mask=mask, cmap='coolwarm', center=0,
-               square=True, linewidths=0.5, cbar_kws={"shrink": 0.8}, ax=ax)
+    if plot:
+        fig, ax = plt.subplots(figsize=(10, 8))
+        sns.heatmap(corr, annot=True, mask=mask, cmap='coolwarm', center=0,
+                   square=True, linewidths=0.5, cbar_kws={"shrink": 0.8}, ax=ax)
     
     
-    plt.savefig(output_path, dpi=100, bbox_inches="tight")
-    plt.close()
+        plt.savefig(output_path, dpi=100, bbox_inches="tight")
+        plt.close()
 

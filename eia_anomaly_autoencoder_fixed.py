@@ -93,7 +93,7 @@ def train_autoencoder(X: np.ndarray, cfg: Config) -> Tuple[AE, np.ndarray]:
     return model, errs
 
 
-def main():
+def main(plot: bool = False):
     cfg = Config()
     s = load_series(cfg)
 
@@ -132,21 +132,22 @@ def main():
     anomalies = z > cfg.z_thresh
 
     # Plot on original series
-    plt.figure(figsize=(10,5))
-    plt.plot(s.index, s.values, label='EIA series', alpha=0.7)
-    if anomalies.any():
-        ts_anom = err_s.index[anomalies]
-        vals = s.reindex(ts_anom).values
-        plt.scatter(ts_anom, vals, color='red', s=24, label='AE anomaly')
-    plt.legend()
-    save_fig('eia_anomaly_autoencoder.png')
+    if plot:
+        plt.figure(figsize=(10,5))
+        plt.plot(s.index, s.values, label='EIA series', alpha=0.7)
+        if anomalies.any():
+            ts_anom = err_s.index[anomalies]
+            vals = s.reindex(ts_anom).values
+            plt.scatter(ts_anom, vals, color='red', s=24, label='AE anomaly')
+        plt.legend()
+        save_fig('eia_anomaly_autoencoder.png')
 
     # Also show error time series
-    plt.figure(figsize=(10,3))
-    plt.plot(err_s.index, err_s.values, label='Recon error')
-    plt.axhline(e_mu + cfg.z_thresh*e_sd, color='red', lw=0.8, linestyle='--', label='threshold')
-    plt.legend()
-    save_fig('eia_anomaly_autoencoder_error.png')
+        plt.figure(figsize=(10,3))
+        plt.plot(err_s.index, err_s.values, label='Recon error')
+        plt.axhline(e_mu + cfg.z_thresh*e_sd, color='red', lw=0.8, linestyle='--', label='threshold')
+        plt.legend()
+        save_fig('eia_anomaly_autoencoder_error.png')
 
 if __name__ == '__main__':
     main()
