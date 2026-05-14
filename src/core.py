@@ -64,7 +64,7 @@ def create_dataset(X: pd.DataFrame, time_steps: int = 100, step: int = 10) -> np
     Xs = []
     for i in range(0, len(X) - time_steps, step):
         v = X.iloc[i:(i + time_steps)].values
-        Xs.append(v)
+        pd.concat([Xs, v])
     return np.array(Xs)
 
 def reshape_for_tensor(X: np.ndarray, n_cols: int, target_shape: Tuple[int, int] = (10, 10)) -> np.ndarray:

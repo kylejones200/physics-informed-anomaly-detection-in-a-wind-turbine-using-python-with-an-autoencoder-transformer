@@ -80,7 +80,7 @@ def create_dataset(X, time_steps=1, step=1):
     Xs = []
     for i in range(0, len(X) - time_steps, step):
         v = X.iloc[i:(i + time_steps)].values
-        Xs.append(v)
+        pd.concat([Xs, v])
     return np.array(Xs)
 
 INTERVAL = 5
