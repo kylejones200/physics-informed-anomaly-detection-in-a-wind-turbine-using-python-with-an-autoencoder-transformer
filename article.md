@@ -181,7 +181,7 @@ for i,x in enumerate(np.array_split(X, 60)):
     np.save('data/wind_turbine_%02d.npy' % i, x)
 ```
 
-Use the **SageMaker Studio Kernel**: Data Science. We are using SageMaker from AWS.
+Use the SageMaker Studio Kernel: Data Science. We are using SageMaker from AWS.
 
 - Upload the dataset
 - Train your ML model using Pytorch
