@@ -395,9 +395,8 @@ transformer = estimator.transformer(
     strategy='MultiRecord',
     assemble_with='Line'
 )
-```
 
-``` 
+
 # To start a transform job:
 transformer.transform(train_input, content_type='application/x-npy')
 # Then wait until transform job is completed
