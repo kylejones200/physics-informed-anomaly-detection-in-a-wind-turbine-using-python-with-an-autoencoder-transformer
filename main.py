@@ -52,40 +52,40 @@ def main():
     if config['analysis']['run_preprocessing']:
                 df_train, scaler = preprocess_data(df, features, config['preprocessing']['wavelet'])
         
-        if config['analysis']['run_anomaly_detection']:
+if config['analysis']['run_anomaly_detection']:
                         anomaly_scores, anomalies = detect_anomalies(
                 df_train,
                 contamination=config['preprocessing']['contamination'],
                 n_estimators=config['preprocessing']['n_estimators'],
                 random_state=config['preprocessing']['random_state']
             )
-            logging.info(f"Found {len(anomalies)} anomalies")
+logging.info(f"Found {len(anomalies)} anomalies")
             
-            plot_anomaly_detection(df_train, anomalies, 'voltage',
+plot_anomaly_detection(df_train, anomalies, 'voltage',
                                   output_dir / 'anomaly_detection.png')
         
-        if config['analysis']['run_correlation']:
+if config['analysis']['run_correlation']:
                         plot_correlation_heatmap(df_train, output_dir / 'correlation_heatmap.png')
         
-        plot_denoised_data(df_train, output_dir / 'denoised_normalized_data.png')
+plot_denoised_data(df_train, output_dir / 'denoised_normalized_data.png')
         
-        if config['analysis']['create_tensors']:
+if config['analysis']['create_tensors']:
                         time_steps = config['tensor']['time_steps_multiplier'] * config['tensor']['interval']
-            X = create_dataset(df_train, time_steps, config['tensor']['step'])
-            X = np.nan_to_num(X, copy=True)
+X = create_dataset(df_train, time_steps, config['tensor']['step'])
+X = np.nan_to_num(X, copy=True)
             
-            n_cols = len(df_train.columns)
-            X_reshaped = reshape_for_tensor(
+n_cols = len(df_train.columns)
+X_reshaped = reshape_for_tensor(
                 X, 
                 n_cols, 
                 tuple(config['tensor']['target_shape'])
             )
             
-            for i, x in enumerate(np.array_split(X_reshaped, config['tensor']['n_chunks'])):
+for i, x in enumerate(np.array_split(X_reshaped, config['tensor']['n_chunks'])):
                 np.save(data_dir / f'wind_turbine_{i:02d}.npy', x)
-            logging.info(f"Saved {config['tensor']['n_chunks']} tensor chunks to {data_dir}")
+logging.info(f"Saved {config['tensor']['n_chunks']} tensor chunks to {data_dir}")
     
-    logging.info(f"\nAnalysis complete. Figures saved to {output_dir}")
+logging.info(f"\nAnalysis complete. Figures saved to {output_dir}")
 
 if __name__ == "__main__":
     main()
