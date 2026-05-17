@@ -76,7 +76,7 @@ def create_dataset(
     Xs = []
     for i in range(0, len(X) - time_steps, step):
         v = X.iloc[i : (i + time_steps)].values
-        pd.concat([Xs, v])
+        Xs.append(v)
     return np.array(Xs)
 
 
