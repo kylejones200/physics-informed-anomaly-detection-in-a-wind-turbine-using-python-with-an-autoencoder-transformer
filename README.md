@@ -48,3 +48,11 @@ Edit `config.yaml` to customize:
 - Wavelet denoising uses Daubechies 6 (db6) wavelet by default.
 - Isolation Forest contamination parameter controls the expected proportion of anomalies.
 - Tensor chunks are saved as .npy files for use with deep learning models.
+
+## Disclaimer
+
+Educational/demo code only. Not financial, safety, or engineering advice. Use at your own risk. Verify results independently before any production or operational use.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

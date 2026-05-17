@@ -90,53 +90,57 @@ def reshape_for_tensor(
 
 def plot_denoised_data(df_train: pd.DataFrame, output_path: Path, plot: bool = False):
     """Plot denoised and normalized data"""
-    if plot:
-        fig, ax = plt.subplots(figsize=(12, 6))
+    if not plot:
+        return
 
-        for col in df_train.columns:
-            ax.plot(df_train.index, df_train[col], label=col, linewidth=1.0, alpha=0.7)
+    fig, ax = plt.subplots(figsize=(12, 6))
 
-        ax.set_xlabel("Time")
-        ax.set_ylabel("Normalized Value")
-        ax.legend(loc="best", ncol=2)
+    for col in df_train.columns:
+        ax.plot(df_train.index, df_train[col], label=col, linewidth=1.0, alpha=0.7)
 
-        plt.savefig(output_path, dpi=100, bbox_inches="tight")
-        plt.close()
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Normalized Value")
+    ax.legend(loc="best", ncol=2)
+
+    plt.savefig(output_path, dpi=100, bbox_inches="tight")
+    plt.close()
 
 
 def plot_anomaly_detection(
     df: pd.DataFrame, anomalies: pd.DataFrame, feature: str, output_path: Path
 ):
     """Plot anomaly detection results"""
-    if plot:
-        fig, ax = plt.subplots(figsize=(12, 6))
+    if not plot:
+        return
 
-        normal_mask = ~df.index.isin(anomalies.index)
-        normal_data = df[normal_mask]
+    fig, ax = plt.subplots(figsize=(12, 6))
 
-        ax.scatter(
-            normal_data.index,
-            normal_data[feature],
-            c="#4A90A4",
-            label="Normal",
-            s=20,
-            alpha=0.6,
-        )
-        ax.scatter(
-            anomalies.index,
-            anomalies[feature],
-            c="#D4A574",
-            label="Anomaly",
-            s=30,
-            alpha=0.8,
-        )
+    normal_mask = ~df.index.isin(anomalies.index)
+    normal_data = df[normal_mask]
 
-        ax.set_xlabel("Time")
-        ax.set_ylabel(feature)
-        ax.legend(loc="best")
+    ax.scatter(
+        normal_data.index,
+        normal_data[feature],
+        c="#4A90A4",
+        label="Normal",
+        s=20,
+        alpha=0.6,
+    )
+    ax.scatter(
+        anomalies.index,
+        anomalies[feature],
+        c="#D4A574",
+        label="Anomaly",
+        s=30,
+        alpha=0.8,
+    )
 
-        plt.savefig(output_path, dpi=100, bbox_inches="tight")
-        plt.close()
+    ax.set_xlabel("Time")
+    ax.set_ylabel(feature)
+    ax.legend(loc="best")
+
+    plt.savefig(output_path, dpi=100, bbox_inches="tight")
+    plt.close()
 
 
 def plot_correlation_heatmap(df: pd.DataFrame, output_path: Path, plot: bool = False):
