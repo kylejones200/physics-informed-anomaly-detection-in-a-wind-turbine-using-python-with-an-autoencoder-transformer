@@ -7,7 +7,6 @@ Main entry point for running anomaly detection analysis.
 
 import argparse
 import logging
-import os
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +15,9 @@ import yaml
 from src.core import (
     create_dataset,
     detect_anomalies,
+    plot_anomaly_detection,
+    plot_correlation_heatmap,
+    plot_denoised_data,
     preprocess_data,
     reshape_for_tensor,
 )
@@ -25,7 +27,7 @@ logging.basicConfig(
 )
 
 
-def load_config(config_path: Path = None) -> dict:
+def load_config(config_path: Path | None = None) -> dict:
     """Load configuration from YAML file."""
     if config_path is None:
         config_path = Path(__file__).parent / "config.yaml"
@@ -34,7 +36,7 @@ def load_config(config_path: Path = None) -> dict:
         return yaml.safe_load(f)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Wind Turbine Anomaly Detection")
     parser.add_argument("--config", type=Path, default=None, help="Path to config file")
     parser.add_argument(
@@ -44,7 +46,6 @@ def main():
         "--output-dir", type=Path, default=None, help="Output directory for plots"
     )
     args = parser.parse_args()
-
     config = load_config(args.config)
     output_dir = (
         Path(args.output_dir)
@@ -52,55 +53,64 @@ def main():
         else Path(config["output"]["figures_dir"])
     )
     output_dir.mkdir(exist_ok=True)
-
     data_dir = Path(config["output"]["data_dir"])
     data_dir.mkdir(exist_ok=True)
-
     if not args.data_path.exists():
         raise FileNotFoundError(f"Data file not found: {args.data_path}")
 
     df = pd.read_csv(args.data_path)
     features = config["data"]["features"]
-
+    df_train = df
     if config["analysis"]["run_preprocessing"]:
-        df_train, scaler = preprocess_data(
+        df_train, _scaler = preprocess_data(
             df, features, config["preprocessing"]["wavelet"]
         )
 
+    if config["analysis"]["run_anomaly_detection"]:
+        _anomaly_scores, anomalies = detect_anomalies(
+            df_train,
+            contamination=config["preprocessing"]["contamination"],
+            n_estimators=config["preprocessing"]["n_estimators"],
+            random_state=config["preprocessing"]["random_state"],
+        )
+        logging.info(f"Found {len(anomalies)} anomalies")
+        plot_anomaly_detection(
+            df_train,
+            anomalies,
+            "voltage",
+            output_dir / "anomaly_detection.png",
+            plot=True,
+        )
 
-if config["analysis"]["run_anomaly_detection"]:
-    anomaly_scores, anomalies = detect_anomalies(
-        df_train,
-        contamination=config["preprocessing"]["contamination"],
-        n_estimators=config["preprocessing"]["n_estimators"],
-        random_state=config["preprocessing"]["random_state"],
-    )
-logging.info(f"Found {len(anomalies)} anomalies")
+    if config["analysis"]["run_correlation"]:
+        plot_correlation_heatmap(
+            df_train, output_dir / "correlation_heatmap.png", plot=True
+        )
 
-plot_anomaly_detection(
-    df_train, anomalies, "voltage", output_dir / "anomaly_detection.png"
-)
+    plot_denoised_data(df_train, output_dir / "denoised_normalized_data.png", plot=True)
 
-if config["analysis"]["run_correlation"]:
-    plot_correlation_heatmap(df_train, output_dir / "correlation_heatmap.png")
+    if config["analysis"]["create_tensors"]:
+        time_steps = (
+            config["tensor"]["time_steps_multiplier"] * config["tensor"]["interval"]
+        )
+        X = create_dataset(df_train, time_steps, config["tensor"]["step"])
+        X = np.nan_to_num(X, copy=True)
 
-plot_denoised_data(df_train, output_dir / "denoised_normalized_data.png")
+        n_cols = len(df_train.columns)
+        X_reshaped = reshape_for_tensor(
+            X, n_cols, tuple(config["tensor"]["target_shape"])
+        )
 
-if config["analysis"]["create_tensors"]:
-    time_steps = (
-        config["tensor"]["time_steps_multiplier"] * config["tensor"]["interval"]
-    )
-X = create_dataset(df_train, time_steps, config["tensor"]["step"])
-X = np.nan_to_num(X, copy=True)
+        for i, x in enumerate(
+            np.array_split(X_reshaped, config["tensor"]["n_chunks"])
+        ):
+            np.save(data_dir / f"wind_turbine_{i:02d}.npy", x)
+        logging.info(
+            f"Saved {config['tensor']['n_chunks']} tensor chunks to {data_dir}"
+        )
 
-n_cols = len(df_train.columns)
-X_reshaped = reshape_for_tensor(X, n_cols, tuple(config["tensor"]["target_shape"]))
+    logging.info(f"\nAnalysis complete. Figures saved to {output_dir}")
 
-for i, x in enumerate(np.array_split(X_reshaped, config["tensor"]["n_chunks"])):
-    np.save(data_dir / f"wind_turbine_{i:02d}.npy", x)
-logging.info(f"Saved {config['tensor']['n_chunks']} tensor chunks to {data_dir}")
-
-logging.info(f"\nAnalysis complete. Figures saved to {output_dir}")
 
 if __name__ == "__main__":
     main()

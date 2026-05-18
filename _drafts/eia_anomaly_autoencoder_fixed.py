@@ -76,10 +76,8 @@ def train_autoencoder(X: np.ndarray, cfg: Config) -> Tuple[AE, np.ndarray]:
     model = AE(X.shape[1]).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=cfg.lr)
     loss_fn = nn.MSELoss()
-
     ds = TensorDataset(torch.from_numpy(X).float())
     dl = DataLoader(ds, batch_size=cfg.batch_size, shuffle=True)
-
     model.train()
     for _ in range(cfg.epochs):
         for (xb,) in dl:
@@ -102,14 +100,12 @@ def train_autoencoder(X: np.ndarray, cfg: Config) -> Tuple[AE, np.ndarray]:
 def main(plot: bool = False):
     cfg = Config()
     s = load_series(cfg)
-
     # Physics-informed: learn on STL residual windows (trend/season removed)
     resid = stl_residuals(s, cfg.season).dropna()
     # Standardize residuals for training stability
     mu, sd = resid.mean(), resid.std(ddof=1)
     sd = sd if sd else 1.0
     zres = (resid - mu) / sd
-
     X = make_windows(zres.values, cfg.window)
     if X.shape[0] == 0:
         raise SystemExit("Series too short for configured window size.")
@@ -118,9 +114,7 @@ def main(plot: bool = False):
     n = X.shape[0]
     lo, hi = int(0.1 * n), int(0.9 * n)
     X_train = X[lo:hi]
-
     model, errs = train_autoencoder(X_train, cfg)
-
     # Score all windows using the trained AE
     with torch.no_grad():
         X_all = torch.from_numpy(X).float()
@@ -130,13 +124,11 @@ def main(plot: bool = False):
     # Map window error back to the end timestamp of each window
     err_idx = resid.index[cfg.window - 1 :]
     err_s = pd.Series(all_errs, index=err_idx)
-
     # Z-score thresholding on reconstruction error
     e_mu, e_sd = err_s.mean(), err_s.std(ddof=1)
     e_sd = e_sd if e_sd else 1.0
     z = (err_s - e_mu) / e_sd
     anomalies = z > cfg.z_thresh
-
     # Plot on original series
     if plot:
         plt.figure(figsize=(10, 5))
@@ -147,7 +139,6 @@ def main(plot: bool = False):
             plt.scatter(ts_anom, vals, color="red", s=24, label="AE anomaly")
         plt.legend()
         signalplot.save("eia_anomaly_autoencoder.png")
-
         # Also show error time series
         plt.figure(figsize=(10, 3))
         plt.plot(err_s.index, err_s.values, label="Recon error")

@@ -65,22 +65,18 @@ def train(args):
     X = load_data(args.train)
     criterion = nn.MSELoss()
     kf = TimeSeriesSplit(n_splits=args.k_fold_splits)
-
     for i, (train_idx, test_idx) in enumerate(kf.split(X)):
         if args.k_index_only >= 0 and args.k_index_only != i:
             continue
         X_train, X_test = X[train_idx], X[test_idx]
         X_train = torch.from_numpy(X_train).float().to(device)
         X_test = torch.from_numpy(X_test).float().to(device)
-
         train_ds = torch.utils.data.TensorDataset(X_train, X_train)
         test_ds = torch.utils.data.TensorDataset(X_test, X_test)
         train_loader = torch.utils.data.DataLoader(train_ds, batch_size=args.batch_size)
         test_loader = torch.utils.data.DataLoader(test_ds, batch_size=args.batch_size)
-
         model = create_model(args.num_features, args.dropout_rate).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
-
         for epoch in range(args.num_epochs):
             t0 = time.time()
             train_loss, test_loss = train_epoch(
