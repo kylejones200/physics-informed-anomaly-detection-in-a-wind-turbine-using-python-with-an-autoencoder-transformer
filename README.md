@@ -2,6 +2,14 @@
 
 This project demonstrates physics-informed anomaly detection for wind turbine data using wavelet denoising, Isolation Forest, and tensor preparation for deep learning models.
 
+## Business context
+
+The challenge we're trying to address here is to detect anomalies in the components of a Wind Turbine. Each wind turbine has many sensors that reads data like:
+
+- external temperature - Rotor speed - Air pressure - Voltage (or current) in the generator - Vibration in the GearBox, Generator, and Tower
+
+Depending on the type of the anomalies we want to detect, we need to select one or more features and then prepare a dataset that 'explains' the anomalies. We are interested in three types of anomalies:
+
 ## Article
 
 Medium article: [Physics-Informed Anomaly Detection in Wind Turbine](https://medium.com/@kylejones_47003/physics-informed-anomaly-detection-in-a-wind-turbine-using-python-with-an-autoencoder-transformer-06eb68aeb0e8)
