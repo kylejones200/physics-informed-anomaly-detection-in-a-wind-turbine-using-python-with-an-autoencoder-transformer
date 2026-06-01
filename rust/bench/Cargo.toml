@@ -1,0 +1,13 @@
+[package]
+name = "physics_informed_anomaly_detection_in_a_wind_turbine_using_python_with_an_autoencoder_transformer_bench"
+description = "Standalone Rust benchmark (no Python)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "bench"
+path = "src/main.rs"
+
+[dependencies]
+physics_informed_anomaly_detection_in_a_wind_turbine_using_python_with_an_autoencoder_transformer_core = { path = "../core" }

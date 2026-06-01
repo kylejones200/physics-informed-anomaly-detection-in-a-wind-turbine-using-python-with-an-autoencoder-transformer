@@ -27,7 +27,10 @@ Medium article: [Physics-Informed Anomaly Detection in Wind Turbine](https://med
 │   └── plotting.py    # Tufte-style plotting utilities
 ├── tests/             # Unit tests
 ├── data/              # Data files and tensor chunks
-└── images/            # Generated plots and figures
+├── images/            # Generated plots and figures
+├── rust/                   # Rust port (core + PyO3 + CLI bench)
+├── benchmark_rust.py       # Python vs Rust benchmark
+├── src/compute_kernel.py   # Python/numpy reference kernel
 ```
 
 ## Data Format
@@ -56,6 +59,31 @@ Edit `config.yaml` to customize:
 - Wavelet denoising uses Daubechies 6 (db6) wavelet by default.
 - Isolation Forest contamination parameter controls the expected proportion of anomalies.
 - Tensor chunks are saved as .npy files for use with deep learning models.
+
+## Rust performance port
+
+Side-by-side **Python vs Rust** implementation of the numeric hot loop — reconstruction errors. Reference PyO3 benchmark: **see `benchmark_rust.py`** on a release build (local machine; run `benchmark_rust.py` to reproduce).
+
+| Path | Role |
+|------|------|
+| `src/compute_kernel.py` | Python/numpy reference kernel |
+| `rust/core/` | Pure Rust library |
+| `rust/py/` | PyO3 bindings |
+| `rust/bench/` | Standalone CLI benchmark |
+| `benchmark_rust.py` | Python vs Rust timing + correctness check |
+
+```bash
+# Rust-only CLI benchmark
+cd rust && cargo run --release -p physics_informed_anomaly_detection_in_a_wind_turbine_using_python_with_an_autoencoder_transformer_bench
+
+# Python vs Rust (PyO3)
+pip install maturin numpy
+maturin develop --release -m rust/py/Cargo.toml
+python benchmark_rust.py
+```
+
+Python ML training, solvers, and orchestration stay in Python; Rust targets the numeric hot loops. Stochastic generators validate output shapes; deterministic kernels match at tight floating-point tolerance.
+
 
 ## Disclaimer
 

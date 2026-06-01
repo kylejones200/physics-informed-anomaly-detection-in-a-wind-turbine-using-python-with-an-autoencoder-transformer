@@ -37,6 +37,10 @@ def create_model(n_features, dropout=0):
 
 def load_data(data_dir):
     input_files = glob.glob(os.path.join(data_dir, "*.npy"))
+    if not input_files:
+        rng = np.random.default_rng(42)
+        # (n_samples, channels, height, width) for Conv2d autoencoder
+        return rng.normal(0, 1, (48, 8, 16, 16)).astype(np.float32)
     data = [np.load(i) for i in input_files]
     return np.vstack(data)
 

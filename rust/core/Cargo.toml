@@ -1,0 +1,9 @@
+[package]
+name = "physics_informed_anomaly_detection_in_a_wind_turbine_using_python_with_an_autoencoder_transformer_core"
+description = "Reconstruction error magnitudes for anomaly detection"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+path = "src/lib.rs"
